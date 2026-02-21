@@ -6,7 +6,7 @@
 
 (function() {
   'use strict';
-  
+
   // Font configuration - 50+ fonts with their Google Fonts URLs
   const fontConfig = {
     // Brand/Display Fonts
@@ -15,12 +15,12 @@
     'montserrat': 'Montserrat:wght@300;400;500;600;700',
     'raleway': 'Raleway:wght@300;400;500;600;700',
     'oswald': 'Oswald:wght@300;400;500;600;700',
-    'bebas-neue': 'Bebas+Neue&display=swap', // Single weight
-    'anton': 'Anton&display=swap', // Single weight
-    'archivo-black': 'Archivo+Black&display=swap', // Single weight
+    'bebas-neue': 'Bebas+Neue&display=swap',
+    'anton': 'Anton&display=swap',
+    'archivo-black': 'Archivo+Black&display=swap',
     'caveat': 'Caveat:wght@400;500;600;700',
-    'pacifico': 'Pacifico&display=swap', // Single weight
-    
+    'pacifico': 'Pacifico&display=swap',
+
     // Sans-Serif (Popular)
     'inter': 'Inter:wght@300;400;500;600;700',
     'roboto': 'Roboto:wght@300;400;500;700',
@@ -42,7 +42,7 @@
     'prompt': 'Prompt:wght@300;400;500;600;700',
     'fira-sans': 'Fira+Sans:wght@300;400;500;600;700',
     'roboto-condensed': 'Roboto+Condensed:wght@300;400;700',
-    
+
     // Serif
     'merriweather': 'Merriweather:wght@300;400;700',
     'playfair': 'Playfair+Display:wght@400;500;600;700',
@@ -57,7 +57,7 @@
     'domine': 'Domine:wght@400;500;600;700',
     'spectral': 'Spectral:wght@300;400;500;600;700',
     'bitter': 'Bitter:wght@300;400;500;600;700',
-    
+
     // Monospace
     'jetbrains-mono': 'JetBrains+Mono:wght@300;400;500;600;700',
     'fira-code': 'Fira+Code:wght@300;400;500;600;700',
@@ -66,9 +66,9 @@
     'roboto-mono': 'Roboto+Mono:wght@300;400;500;600;700',
     'inconsolata': 'Inconsolata:wght@300;400;500;600;700',
     'ubuntu-mono': 'Ubuntu+Mono:wght@400;700',
-    'cutive-mono': 'Cutive+Mono&display=swap', // Single weight
+    'cutive-mono': 'Cutive+Mono&display=swap',
     'courier-prime': 'Courier+Prime:wght@400;700',
-    
+
     // Handwriting/Decorative
     'indie-flower': 'Indie+Flower&display=swap',
     'permanent-marker': 'Permanent+Marker&display=swap',
@@ -80,13 +80,13 @@
     'rock-salt': 'Rock+Salt&display=swap',
     'fredoka': 'Fredoka:wght@300;400;500;600;700'
   };
-  
+
   // Core fonts that load automatically (10 fonts)
   const coreFonts = [
     'inter', 'roboto', 'open-sans', 'lato', 'poppins', 
     'montserrat', 'source-sans', 'comfortaa', 'oswald', 'fira-sans'
   ];
-  
+
   // Load core fonts immediately
   function loadCoreFonts() {
     const families = coreFonts.map(font => fontConfig[font]).join('&family=');
@@ -94,11 +94,11 @@
     link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    
+
     // Add font classes to CSS variables
     updateFontVariables();
   }
-  
+
   // Update CSS variables with loaded fonts
   function updateFontVariables() {
     const style = document.createElement('style');
@@ -111,54 +111,67 @@
     `;
     document.head.appendChild(style);
   }
-  
+
   // Check DOM for font classes and load missing fonts
   function checkAndLoadFonts() {
     const allElements = document.querySelectorAll('*');
     const usedFonts = new Set();
-    
-    // Regular expression to match font classes
-    const fontClassRegex = /font-([a-zA-Z0-9-]+)/g;
-    
+
     allElements.forEach(element => {
-      element.className.split(' ').forEach(cls => {
-        const match = cls.match(/font-([a-zA-Z0-9-]+)/);
-        if (match && match[1]) {
-          const fontName = match[1];
-          if (fontConfig[fontName] && !coreFonts.includes(fontName)) {
-            usedFonts.add(fontName);
+      // FIXED: Check if className exists and is a string
+      if (element.className && typeof element.className === 'string') {
+        element.className.split(' ').forEach(cls => {
+          const match = cls.match(/font-([a-zA-Z0-9-]+)/);
+          if (match && match[1]) {
+            const fontName = match[1];
+            if (fontConfig[fontName] && !coreFonts.includes(fontName)) {
+              usedFonts.add(fontName);
+            }
           }
-        }
-      });
+        });
+      }
+      
+      // FIXED: Also check for SVG elements that might have classList
+      if (element.classList && element.classList.length > 0) {
+        element.classList.forEach(cls => {
+          const match = cls.match(/font-([a-zA-Z0-9-]+)/);
+          if (match && match[1]) {
+            const fontName = match[1];
+            if (fontConfig[fontName] && !coreFonts.includes(fontName)) {
+              usedFonts.add(fontName);
+            }
+          }
+        });
+      }
     });
-    
+
     // Load each used font
     usedFonts.forEach(fontName => {
       loadFont(fontName);
     });
   }
-  
+
   // Load a specific font
   function loadFont(fontName) {
     if (!fontConfig[fontName]) return;
-    
+
     // Check if already loaded
     if (document.getElementById(`font-${fontName}`)) return;
-    
+
     const link = document.createElement('link');
     link.id = `font-${fontName}`;
     link.href = `https://fonts.googleapis.com/css2?family=${fontConfig[fontName]}&display=swap`;
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    
-    console.log(`NovaFlow: Loaded font - ${fontName}`);
+
+    console.log(`NovaStyle: Loaded font - ${fontName}`);
   }
-  
+
   // Observe DOM changes for dynamically added font classes
   function observeDOMChanges() {
     const observer = new MutationObserver(mutations => {
       let shouldCheck = false;
-      
+
       mutations.forEach(mutation => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
           shouldCheck = true;
@@ -170,14 +183,14 @@
           });
         }
       });
-      
+
       if (shouldCheck) {
         // Debounce check to avoid too many calls
         clearTimeout(window.fontCheckTimeout);
         window.fontCheckTimeout = setTimeout(checkAndLoadFonts, 100);
       }
     });
-    
+
     observer.observe(document.body, {
       attributes: true,
       childList: true,
@@ -185,24 +198,24 @@
       attributeFilter: ['class']
     });
   }
-  
+
   // Initialize
   function init() {
     loadCoreFonts();
-    
+
     // Initial check after DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', checkAndLoadFonts);
     } else {
       checkAndLoadFonts();
     }
-    
+
     // Watch for changes
     observeDOMChanges();
   }
-  
+
   init();
-  
+
   // Expose API for manual font loading
   window.NovaFonts = {
     load: loadFont,
@@ -211,5 +224,5 @@
     },
     config: fontConfig
   };
-  
+
 })();
